@@ -33,11 +33,11 @@ var initj2k = function () {
 self.onmessage = function (evt) {
 
 	if (j2k) {
-		if (data && data instanceof ArrayBuffer) {
+		if (evt.data && evt.data instanceof ArrayBuffer) {
 			var data = j2k.decode(evt.data);
 			postMessage({ data: data.buffer }, [data.buffer]);
 		} else {
-			postMessage(evt.data);
+			postMessage({ data: null });
 		}
 	} else {
 		postMessage({ initialized: false });
