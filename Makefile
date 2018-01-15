@@ -40,7 +40,7 @@ wasmworker:
 	-s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_FUNCTIONS="['_decode']" \
 	-I$(OPJ)/build/install/include/openjpeg-2.3 -I$(OPJ)/src/bin/jp2 -I$(OPJ)/src/lib/openjp2 \
 	j2k.js.c $(OPJ)/build/bin/libopenjp2.a  \
-	--post-js ./post.js --pre-js ./pre.js -o wasm/j2k.js
+	--post-js ./post-worker.js --pre-js ./pre-worker.js -o wasmworker/j2k.js
 
 .PHONY: html
 html:
