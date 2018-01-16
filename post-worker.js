@@ -6,20 +6,19 @@ var initj2k = function () {
 		const decode = cwrap('decode', 'number', ['number', 'number', 'number']);
 
 		return {
-			decode: function (data) {
-				var image = null;
-				var dataPtr = _malloc(data.byteLength);
+			decode: function (bufin) {
+				var bufout = null;
+				var dataPtr = _malloc(bufin.byteLength);
 				var sizePtr = _malloc(4);
-				writeArrayToMemory(data, dataPtr);
-				var imagePtr = decode(dataPtr, data.byteLength, sizePtr);
+				writeArrayToMemory(new Uint8Array(bufin), dataPtr);
+				var imagePtr = decode(dataPtr, bufin.byteLength, sizePtr);
 				var size = getValue(sizePtr, 'i32');
 				if (imagePtr)
-					image = new Int16Array(HEAP16.buffer, imagePtr, size);
-				// console.log(size, image);
+					bufout = new Int16Array(HEAP16.buffer, imagePtr, size).slice(0).buffer;
 				_free(dataPtr);
 				_free(imagePtr);
 				_free(sizePtr);
-				return image;
+				return bufout;
 			}
 		};
 
@@ -34,10 +33,11 @@ self.onmessage = function (evt) {
 
 	if (j2k) {
 		if (evt.data && evt.data instanceof ArrayBuffer) {
-			var data = j2k.decode(evt.data);
-			postMessage({ data: data.buffer }, [data.buffer]);
+			var buffer = j2k.decode(evt.data);
+			if (buffer) postMessage(buffer, [buffer]);
+			else postMessage(null);
 		} else {
-			postMessage({ data: null });
+			postMessage(null);
 		}
 	} else {
 		postMessage({ initialized: false });

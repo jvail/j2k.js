@@ -24,6 +24,15 @@ asm:
 	j2k.js.c $(OPJ)/build/bin/libopenjp2.a  \
 	--post-js ./post.js --pre-js ./pre.js -o asm/j2k.js
 
+.PHONY: asmworker
+asmworker:
+	cd $(PWD) && mkdir -p asm && \
+	emcc -Oz --memory-init-file 0 \
+	-s EXPORTED_FUNCTIONS="['_decode']" \
+	-I$(OPJ)/build/install/include/openjpeg-2.3 -I$(OPJ)/src/bin/jp2 -I$(OPJ)/src/lib/openjp2 \
+	j2k.js.c $(OPJ)/build/bin/libopenjp2.a  \
+	--post-js ./post-worker.js --pre-js ./pre-worker.js -o asm/j2k-worker.js
+
 .PHONY: wasm
 wasm:
 	cd $(PWD) && mkdir -p wasm && \
@@ -35,12 +44,12 @@ wasm:
 
 .PHONY: wasmworker
 wasmworker:
-	cd $(PWD) && mkdir -p wasmworker && \
-	emcc -Oz --memory-init-file 0 -s WASM=1 -s NO_EXIT_RUNTIME=1 \
-	-s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_FUNCTIONS="['_decode']" \
+	cd $(PWD) && mkdir -p wasm && \
+	emcc -Oz --memory-init-file 0 -s WASM=1 \
+	-s NO_EXIT_RUNTIME=1 -s ALLOW_MEMORY_GROWTH=1 -s EXPORTED_FUNCTIONS="['_decode']" \
 	-I$(OPJ)/build/install/include/openjpeg-2.3 -I$(OPJ)/src/bin/jp2 -I$(OPJ)/src/lib/openjp2 \
 	j2k.js.c $(OPJ)/build/bin/libopenjp2.a  \
-	--post-js ./post-worker.js --pre-js ./pre-worker.js -o wasmworker/j2k.js
+	--post-js ./post-worker.js --pre-js ./pre-worker.js -o wasm/j2k-worker.js
 
 .PHONY: html
 html:

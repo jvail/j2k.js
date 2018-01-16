@@ -1,5 +1,5 @@
 /*
- * partly copied from opj_decompress_fuzzer:
+ * partly copied from opj_decompress_fuzzer
  *
  * The copyright in this software is being made available under the 2-clauses
  * BSD License, included below. This software may be subject to other third
@@ -79,21 +79,20 @@ static OPJ_OFF_T skip(OPJ_OFF_T bytes, void *data)
     return bytes;
 }
 
-
 OPJ_INT16 * decode(const uint8_t *buf, OPJ_SIZE_T len, OPJ_SIZE_T *datasize)
 {
+    opj_codec_t* codec = NULL;
+    codec = opj_create_decompress(OPJ_CODEC_J2K);
 
-    opj_codec_t* codec = opj_create_decompress(OPJ_CODEC_J2K);
     opj_set_info_handler(codec, info, NULL);
     opj_set_warning_handler(codec, warn, NULL);
     opj_set_error_handler(codec, error, NULL);
 
     opj_dparameters_t parameters;
     opj_set_default_decoder_parameters(&parameters);
-
     opj_setup_decoder(codec, &parameters);
 
-    opj_stream_t *stream = opj_stream_create(1024, OPJ_TRUE);
+    opj_stream_t *stream = opj_stream_default_create(OPJ_TRUE);
     MemFile file;
     file.data = buf;
     file.len = len;
@@ -115,8 +114,7 @@ OPJ_INT16 * decode(const uint8_t *buf, OPJ_SIZE_T len, OPJ_SIZE_T *datasize)
 
     // TODO: opj_set_decode_area
 
-    if (!(opj_get_decoded_tile(codec, stream, image, 0) &&
-            opj_end_decompress(codec, stream))) {
+    if (!opj_get_decoded_tile(codec, stream, image, 0)) {
         fprintf(stderr, "ERROR: failed to decode tile\n");
         opj_destroy_codec(codec);
         opj_stream_destroy(stream);
@@ -125,7 +123,7 @@ OPJ_INT16 * decode(const uint8_t *buf, OPJ_SIZE_T len, OPJ_SIZE_T *datasize)
     }
 
     OPJ_SIZE_T ii = image->comps[0].w * image->comps[0].h;
-    *datasize = image->numcomps * ii;
+    *datasize = image->numcomps * ii * sizeof(OPJ_INT16);
     OPJ_INT16 *pix = NULL, *ptr = NULL;
     OPJ_SIZE_T i;
     pix = (OPJ_INT16 *)malloc(*datasize);
@@ -139,8 +137,9 @@ OPJ_INT16 * decode(const uint8_t *buf, OPJ_SIZE_T len, OPJ_SIZE_T *datasize)
         }
     }
 
-    opj_stream_destroy(stream);
+    opj_end_decompress(codec, stream);
     opj_destroy_codec(codec);
+    opj_stream_destroy(stream);
     opj_image_destroy(image);
 
     return pix;
