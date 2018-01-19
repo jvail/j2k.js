@@ -79,7 +79,7 @@ static OPJ_OFF_T skip(OPJ_OFF_T bytes, void *data)
     return bytes;
 }
 
-OPJ_INT16 * decode(const uint8_t *buf, OPJ_SIZE_T len, OPJ_SIZE_T *datasize)
+OPJ_INT16 * decode(OPJ_UINT32 idx, const uint8_t *buf, OPJ_SIZE_T len, OPJ_SIZE_T *datasize)
 {
     opj_codec_t* codec = NULL;
     codec = opj_create_decompress(OPJ_CODEC_J2K);
@@ -114,7 +114,7 @@ OPJ_INT16 * decode(const uint8_t *buf, OPJ_SIZE_T len, OPJ_SIZE_T *datasize)
 
     // TODO: opj_set_decode_area
 
-    if (!opj_get_decoded_tile(codec, stream, image, 0)) {
+    if (!opj_get_decoded_tile(codec, stream, image, idx)) {
         fprintf(stderr, "ERROR: failed to decode tile\n");
         opj_destroy_codec(codec);
         opj_stream_destroy(stream);
