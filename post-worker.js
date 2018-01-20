@@ -33,8 +33,9 @@ self.onmessage = function (evt) {
 
 	if (j2k) {
 		if (evt.data && evt.data.buffer instanceof ArrayBuffer) {
-			var buffer = j2k.decode(evt.data.idx, evt.data.buffer);
-			if (buffer) postMessage(buffer, [buffer]);
+			var idx = evt.data.idx;
+			var buffer = j2k.decode(idx, evt.data.buffer);
+			if (buffer) postMessage({ idx: idx, buf: buffer } , [buffer]);
 			else postMessage(null);
 		} else {
 			postMessage(null);
