@@ -14,7 +14,7 @@ var initj2k = function () {
 				var imagePtr = decode(idx, dataPtr, bufin.byteLength, sizePtr);
 				var size = getValue(sizePtr, 'i32');
 				if (imagePtr)
-					bufout = new Int16Array(HEAP16.buffer, imagePtr, size).slice().buffer;
+					bufout = HEAP16.buffer.slice(imagePtr, imagePtr + size);
 				_free(dataPtr);
 				_free(imagePtr);
 				_free(sizePtr);
@@ -32,11 +32,16 @@ var initj2k = function () {
 self.onmessage = function (evt) {
 
 	if (j2k) {
-		if (evt.data && evt.data.buffer instanceof ArrayBuffer) {
+		if (evt.data.buf instanceof ArrayBuffer) {
 			var idx = evt.data.idx;
-			var buffer = j2k.decode(idx, evt.data.buffer);
-			if (buffer) postMessage({ idx: idx, buf: buffer } , [buffer]);
-			else postMessage(null);
+			try {
+				var buffer = j2k.decode(idx, evt.data.buf);
+				if (buffer) postMessage({ idx: idx, buf: buffer } , [buffer]);
+				else postMessage(null);
+			} catch (err) {
+				console.log(err);
+				postMessage(null);
+			}
 		} else {
 			postMessage(null);
 		}
